@@ -18,6 +18,8 @@ from django.urls import path, include
 from django.views.generic import RedirectView
 from django.conf import settings
 from django.conf.urls.static import static
+import dashboard.views
+from django.conf.urls import include, url
 
 
 urlpatterns = [
@@ -25,4 +27,5 @@ urlpatterns = [
     path('dashboard/', include('dashboard.urls')),
     path('login/', include('login.urls')),
     path('', RedirectView.as_view(url='/login/', permanent=True)),
+    url(r'mplimage.png', dashboard.views.mplimage),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
