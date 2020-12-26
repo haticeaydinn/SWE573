@@ -41,6 +41,7 @@ def mplimage(request):
                                    u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
                                    u"\U00002702-\U000027B0"
                                    u"\U000024C2-\U0001F251"
+                                   u"\U0001f921"
                                    "]+", flags=re.UNICODE)
         return emoji_pattern.sub(r'', string)
 
