@@ -18,8 +18,14 @@
         DISCOVER
       </a>
       <form class="form-inline">
-        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Sign In</button>
-        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Sign Out</button>
+        {% if user.is_authenticated %}
+          <span class="navbar-text" style="text-align: center;">
+            Hi {{ user.first_name}}!
+          </span>
+          <a class="btn btn-primary" href="/logout" role="button">Logout</a>
+        {% else %}
+          <a class="btn btn-primary" href="/login" role="button">Login</a>
+        {% endif %}
       </form>
     </nav>
     <div class="container">

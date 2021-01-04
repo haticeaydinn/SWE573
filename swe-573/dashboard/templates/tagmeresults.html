@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+
+<body>
+
+    {% block content %}
+    
+    <h1>TagMe Results</h1>
+    
+    { % for items in {{ dat }} % }
+        <h3>items</h3>
+    { % endfor % }
+    
+    {% endblock %}
+    
+</body>

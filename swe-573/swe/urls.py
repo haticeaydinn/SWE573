@@ -20,12 +20,15 @@ from django.conf import settings
 from django.conf.urls.static import static
 import dashboard.views
 from django.conf.urls import include, url
+from django.contrib.auth import views as auth_views
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('dashboard/', include('dashboard.urls')),
-    path('login/', include('login.urls')),
+    # path('login/', include('login.urls')),
+    path('login/', auth_views.LoginView.as_view(template_name="login.html"), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('', RedirectView.as_view(url='/login/', permanent=True)),
     url(r'mplimage.png', dashboard.views.mplimage),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

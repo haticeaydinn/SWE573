@@ -3,5 +3,8 @@ from . import views
 
 urlpatterns = [
     path('', views.index),
-    path('image/', views.mplimage)
+    path('image/', views.mplimage),
+    path('displayposts/', views.display_text),
+    path('tagme/', views.tagme_result)
+
 ]

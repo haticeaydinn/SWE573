@@ -2,59 +2,59 @@
 
 {% block content %}
 <div class="container p-4 mb-4 my-3">
-    <nav class="navbar navbar-light" style="background-color: #D6E7FF;">
-        <a class="navbar-brand" href="#">Type the topic you want to analyze: </a>
-      <form class="form-inline">
-        <input class="form-control mr-sm-2" type="search" placeholder="COVID, ELECTION..." aria-label="Search">
-        <button class="btn btn-light" type="submit">Analyze!</button>
-      </form>
-    </nav>
+    <form method='POST'>
+      {% csrf_token %}
+      {{ form.as_p }}
+      Type the topic you want to analyze: <input type="text" name="name" placeholder="COVID, ELECTION...">
+      <button class="btn btn-light" type="submit">Analyze!</button>
+    </form>
 </div>
+<h1>The word you searched for: {{data}}</h1>
 <div class="container p-4 mb-4 my-3">
-    <div class="row">
-        {% for user in users %}
-         <div class="card">
-             <div class="card" style="width: 18rem;">
-                <h1>My Profile</h1>
-                <img src="{{ user.image_url }}" class="card-img-top" alt="..." width="100" height="300">
-                <div class="card-body">
-                    <h5 class="card-title">{{ user.name }}{{ " " }}{{ user.surname }}</h5>
-                    <h5 class="card-title">{{ user.email }}</h5>
-                </div>
-             </div>
-             <div class="card" style="width: 18rem;">
-                <h1>Search History</h1>
-                <div class="card-body">
-                    <div class="list-group">
-                      <div class="list-group-item">COVID</div>
-                      <div class="list-group-item">
-                        <a href="#" class="list-group-item indent">12-06-2020</a>
-                        <a href="#" class="list-group-item indent">12-04-2020</a>
-                      </div>
-                    </div>
-                    <div class="list-group">
-                      <div class="list-group-item">US ELECTION</div>
-                      <div class="list-group-item">
-                        <a href="#" class="list-group-item indent">11-07-2020</a>
-                        <a href="#" class="list-group-item indent">11-06-2020</a>
-                        <a href="#" class="list-group-item indent">11-01-2020</a>
-                      </div>
-                    </div>
-                </div>
-             </div>
-        </div>
-        {% endfor %}
+    <div class="row">      
         <div class="card">
-            <div class="card" style="width: 49rem;">
+            <div class="card" style="width: 18rem;">
+              <h1>My Profile</h1>
+              <img src="{{ user_selected.image_url }}" class="card-img-top" alt="..." width="100" height="300">
               <div class="card-body">
-                  <h1 class="card-title">Dashboard</h1>
-                  <h5 class="card-title">Most Common Used Nouns</h5>
-                  <img src=r'mplimage.png' class="card-img-top" alt="...">
-                  <p class="card-text">You can see the common nouns used about the topic you choose.</p>
-                  <a href="/dashboard/image" class="btn btn-primary">Click to see the graph in detail</a>
+                  <h5 class="card-title">{{ request.user.first_name }}{{ " " }}{{ request.user.last_name }}</h5>
+                  <h5 class="card-title">{{ request.user.email }}</h5>
               </div>
             </div>
-        </div>
+            <div class="card" style="width: 18rem;">
+              <h1>Search History</h1>
+              <div class="card-body">
+                  <div class="list-group">
+                    <div class="list-group-item">COVID</div>
+                    <div class="list-group-item">
+                      <a href="#" class="list-group-item indent">12-06-2020</a>
+                      <a href="#" class="list-group-item indent">12-04-2020</a>
+                    </div>
+                  </div>
+                  <div class="list-group">
+                    <div class="list-group-item">US ELECTION</div>
+                    <div class="list-group-item">
+                      <a href="#" class="list-group-item indent">11-07-2020</a>
+                      <a href="#" class="list-group-item indent">11-06-2020</a>
+                      <a href="#" class="list-group-item indent">11-01-2020</a>
+                    </div>
+                  </div>
+              </div>
+            </div>
+      </div>     
+      <div class="card">
+          <div class="card" style="width: 49rem;">
+            <div class="card-body">
+                <h1 class="card-title">Dashboard</h1>
+                <h5 class="card-title">Most Common Used Nouns</h5>
+                <img src=r'mplimage.png' class="card-img-top" alt="...">
+                <p class="card-text">You can see the common nouns used about the topic you choose.</p>
+                <a href="/dashboard/image" class="btn btn-primary">Click to see the graph in detail</a>
+                <a href="/dashboard/displayposts" class="btn btn-primary">Click to see the post titles</a>
+                <a href="/dashboard/tagme" class="btn btn-primary">Click to see the entity list</a>
+            </div>
+          </div>
+      </div>
     </div>
 </div>
 {% endblock %}
