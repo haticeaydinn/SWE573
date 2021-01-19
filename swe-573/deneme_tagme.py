@@ -14,7 +14,7 @@ lunch_annotations = tagme.annotate("Jeremy Clarkson: Dear the newspapers. I didn
 
 # Print annotations with a score higher than 0.1
 for ann in lunch_annotations.get_annotations(0.1):
-    print(ann)
+    print(ann, ann.uri())
 
 print("----------------")
 
