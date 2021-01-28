@@ -6,6 +6,8 @@ urlpatterns = [
     path('image/', views.mplimage),
     path('displayposts/', views.display_text),
     path('tagme/', views.tagme_result),
-    path('sentiment/', views.sentiment_analysis)
+    path('sentiment/', views.sentiment_analysis),
+    path('wordcloud/', views.wordcloud_img),
+    path('entitylist/', views.entity_list)
 
 ]

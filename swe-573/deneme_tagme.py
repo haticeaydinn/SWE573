@@ -31,7 +31,7 @@ print("----------------")
 
 
 # Get relatedness between a pair of entities specified by title.
-rels = tagme.relatedness_title(("Barack Obama", "Italy"))
+rels = tagme.relatedness_title(("Melania Trump","First Lady"))
 print(f"Obama and italy have a semantic relation of {rels.relatedness[0].rel}")
 
 # Get relatedness between a pair of entities specified by Wikipedia ID.

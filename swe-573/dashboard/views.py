@@ -226,6 +226,8 @@ def tagme_result(request):
     file1 = open('file.txt', 'r', encoding='utf-8') 
     count = 0
     ann_list = ["Entity Results","\n","\n"]
+    
+    entity_title_list = []
 
     # Using for loop 
     for line in file1: 
@@ -235,12 +237,13 @@ def tagme_result(request):
         ann_list.append("\n")
 
         # Print annotations with a score higher than 0.1
-        for ann in lunch_annotations.get_annotations(0.1):
+        for ann in lunch_annotations.get_annotations(min_rho=0.35):
             ann_list.append(ann)
             ann_list.append("\t")
             ann_list.append(ann.uri())
             ann_list.append("\n")
-    
+            entity_title_list.append(ann.entity_title)
+
     # Closing files 
     file1.close() 
 
@@ -267,3 +270,74 @@ def sentiment_analysis(request):
     # Closing files 
     file2.close()
     return HttpResponse(sent_list, content_type="text/plain")
+
+
+def wordcloud_img(request):
+
+    import matplotlib.pyplot as pPlot
+    from wordcloud import WordCloud, STOPWORDS
+    import numpy as npy
+    from PIL import Image
+
+    # search_word = request.session['search_word']
+    searched_word = val()
+    
+    dataset = open("file.txt", "r", encoding='utf-8').read()
+
+    def create_word_cloud(string):
+        maskArray = npy.array(Image.open("cloud_mask.png"))
+        cloud = WordCloud(background_color = "white", max_words = 200, mask = maskArray, stopwords = set(STOPWORDS))
+        cloud.generate(string)
+        cloud.to_file("wordcloud.png")
+
+    dataset = dataset.lower()
+
+    for word in dataset.split(' '):
+        if word == searched_word:
+            dataset = dataset.replace(searched_word, '')
+        
+    create_word_cloud(dataset)
+
+    image_data = open("wordcloud.png", "rb").read()
+    response = HttpResponse(image_data, content_type="image/png")
+
+    return response
+
+
+def entity_list(request):
+    import tagme
+    # Set the authorization token for subsequent calls.
+    tagme.GCUBE_TOKEN = "a5a377c1-1bd0-47b9-907a-75b1cdacb1d9-843339462"
+
+    file1 = open('file.txt', 'r', encoding='utf-8') 
+    entity_title_list = []
+
+    # Using for loop 
+    for line in file1: 
+        lunch_annotations = tagme.annotate(line)
+        # Print annotations with a score higher than 0.1
+        for ann in lunch_annotations.get_annotations(min_rho=0.35):
+            entity_title_list.append(ann.entity_title)
+
+    # Closing files 
+    file1.close()
+
+    entity_title_list = list(dict.fromkeys(entity_title_list))
+
+    relation_degree_list = []
+    relation_pair_list = []
+
+    for i in range(0,len(entity_title_list)):
+        for j in range(i+1,len(entity_title_list)):
+            rels = tagme.relatedness_title((entity_title_list[i], entity_title_list[j]))
+            relation_degree = rels.relatedness[0].rel
+            # print(f"{entity_title_list[i]} ve {entity_title_list[j]} {relation_degree}")
+            # print("\n")
+            if relation_degree != 0.0:
+                relation_pair_list.append((entity_title_list[i], entity_title_list[j]))
+                relation_degree_list.append(relation_degree)
+        print(entity_title_list[i])
+        print("done")
+
+    return HttpResponse(relation_degree_list, content_type="text/plain")
+
