@@ -8,6 +8,8 @@ urlpatterns = [
     path('tagme/', views.tagme_result),
     path('sentiment/', views.sentiment_analysis),
     path('wordcloud/', views.wordcloud_img),
-    path('entitylist/', views.entity_list)
+    path('entitylist/', views.entity_list),
+    path('networkgraph/', views.word_co_networkg),
+    path('showhistory/', views.show_history)
 
 ]

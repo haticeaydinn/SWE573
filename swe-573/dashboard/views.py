@@ -15,6 +15,8 @@ nltk.download('punkt')
 from nltk.tokenize import word_tokenize
 import string
 from nltk.corpus import stopwords
+from datetime import date
+from .models import History
 
 # from django.contrib.auth.models import User
 # from .forms import NameForm
@@ -33,11 +35,15 @@ def index(request):
         global val
         def val():
             return data
+
+        
         # request.session['search_word'] = data
         date_interval = request.POST.get('date_interval')
         global val2
         def val2():
             return date_interval
+
+
         return render(request, 'index.html', {'data':data, 'date_interval':date_interval, 'user_selected': user_selected})
 
 
@@ -55,6 +61,16 @@ def mplimage(request):
     selected_date = val2()
     print(searched_word)
     print(selected_date)
+
+    today = date.today()
+    date_format = today.strftime("%b-%d-%Y")
+
+    history = History()
+    history.user_id = request.user.id
+    history.date = date_format
+    history.search_word = searched_word
+    history.search_date_interval = selected_date
+    history.save()
 
     content = []
 
@@ -139,7 +155,7 @@ def mplimage(request):
     # filter out stop words
     
     stop_words = set(stopwords.words('english'))
-    words = [w for w in words if (not w in stop_words and not w in searched_word)]
+    words = [w for w in words if (not w in stop_words and not w in searched_word and w != 'nt')]
 
     # word_freq = Counter(nouns)
     word_freq = Counter(words)
@@ -326,6 +342,7 @@ def entity_list(request):
 
     relation_degree_list = []
     relation_pair_list = []
+    relation_list = ["ALL RELATIONS BETWEEN ENTITIES ARE LISTED BELOW", "\n", "\n"]
 
     for i in range(0,len(entity_title_list)):
         for j in range(i+1,len(entity_title_list)):
@@ -336,8 +353,134 @@ def entity_list(request):
             if relation_degree != 0.0:
                 relation_pair_list.append((entity_title_list[i], entity_title_list[j]))
                 relation_degree_list.append(relation_degree)
+                pairs = entity_title_list[i] + " " + entity_title_list[j]
+                relation_list.append(pairs)
+                relation_list.append("\t")
+                relation_list.append(relation_degree)
+                relation_list.append("\n")
         print(entity_title_list[i])
+        print("Kalan entity sayısı:  ", len(entity_title_list) - (i+1))
         print("done")
 
-    return HttpResponse(relation_degree_list, content_type="text/plain")
+    return HttpResponse(relation_list, content_type="text/plain")
 
+
+def word_co_networkg(request):
+    import numpy as np
+    import pandas as pd 
+    import itertools
+    import unicodedata
+    import networkx as nx
+    from scipy.spatial import distance
+
+
+    my_data = pd.read_csv('file.txt', sep="\n", header=None, names=["post_titles"])
+
+    posts = my_data['post_titles'].as_matrix()
+
+    post_words = []
+    for post in posts:
+        post = re.sub('\s', ' ', post)
+        words = []
+        for token in word_tokenize(post):
+            token = token.lower()
+            table = str.maketrans('', '', string.punctuation)
+            token = token.translate(table)
+            stop_words = set(stopwords.words('english'))
+            if token not in stop_words and len(token) > 1 and token != 'nt':
+                words.append(token)
+                # print(words)
+        post_words.append(words)
+
+    word_cnt = {}
+    for words in post_words:
+        for word in words:
+            if word not in word_cnt:
+                word_cnt[word] = 1
+            else:
+                word_cnt[word] += 1
+        
+    word_cnt_df = pd.DataFrame({'word': [k for k in word_cnt.keys()], 'cnt': [v for v in word_cnt.values()]})
+
+    vocab = {}
+    target_words = word_cnt_df[word_cnt_df['cnt'] > 3]['word'].as_matrix()
+    for word in target_words:
+        if word not in vocab:
+            vocab[word] = len(vocab)
+
+    re_vocab = {}
+    for word, i in vocab.items():
+        re_vocab[i] = word
+    
+    post_combinations = [list(itertools.combinations(words, 2)) for words in post_words]
+    combination_matrix = np.zeros((len(vocab), len(vocab)))
+
+    for post_comb in post_combinations:
+        for comb in post_comb:
+            if comb[0] in target_words and comb[1] in target_words:
+                combination_matrix[vocab[comb[0]], vocab[comb[1]]] += 1
+                combination_matrix[vocab[comb[1]], vocab[comb[0]]] += 1
+            
+    for i in range(len(vocab)):
+        combination_matrix[i, i] /= 2
+
+    jaccard_matrix = 1 - distance.cdist(combination_matrix, combination_matrix, 'jaccard')
+
+    nodes = []
+
+    for i in range(len(vocab)):
+        for j in range(i+1, len(vocab)):
+            jaccard = jaccard_matrix[i, j]
+            if jaccard > 0:
+                nodes.append([re_vocab[i], re_vocab[j], word_cnt[re_vocab[i]], word_cnt[re_vocab[j]], jaccard])    
+
+    G = nx.Graph()
+    G.nodes(data=True)
+
+    for pair in nodes:
+        node_x, node_y, node_x_cnt, node_y_cnt, jaccard = pair[0], pair[1], pair[2], pair[3], pair[4]
+        if not G.has_node(node_x):
+            G.add_node(node_x, count=node_x_cnt)
+        if not G.has_node(node_y):
+            G.add_node(node_y, count=node_y_cnt)
+        if not G.has_edge(node_x, node_y):
+            G.add_edge(node_x, node_y, weight=jaccard)
+
+    plt.switch_backend('agg')        
+    plt.figure(figsize=(15,15))
+    pos = nx.spring_layout(G, k=0.1)
+
+    node_size = [d['count']*100 for (n,d) in G.nodes(data=True)]
+    nx.draw_networkx_nodes(G, pos, node_color='cyan', alpha=1.0, node_size=node_size)
+    nx.draw_networkx_labels(G, pos, font_size=14)
+
+    edge_width = [d['weight']*10 for (u,v,d) in G.edges(data=True)]
+    nx.draw_networkx_edges(G, pos, alpha=0.2, edge_color='black', width=edge_width)
+
+    plt.axis('off')
+    # plt.show()
+    plt.savefig('word_cooccurance.png')
+    
+    image_data = open("word_cooccurance.png", "rb").read()   
+    response = HttpResponse(image_data, content_type="image/png")
+    return response
+
+
+    '''
+    plt.savefig('word_cooccurance.png')
+
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
+    plt.close(fig)
+
+    response = HttpResponse(buf.getvalue(), content_type='image/png')
+    return response
+    '''
+
+def show_history(request):
+    history_data = History.objects.filter(user_id=request.user.id)
+    hist = {
+        "history_data": history_data
+    }
+
+    return render(request, "showhistory.html", hist)
