@@ -193,6 +193,7 @@ def display_text(request):
     d = file1.read()
     return render(request,'displaypost.html',{'dat':d})
     '''
+    '''
     db_post = PostTitle.objects.filter(user_id=request.user.id , search_date_interval=val2(), search_word=val(), date=date.today().strftime("%b-%d-%Y"))
     file2 = db_post.values_list('title', flat=True)
     
@@ -212,6 +213,13 @@ def display_text(request):
     # Closing files 
     # file2.close()
     return HttpResponse(disp_list, content_type="text/plain")
+    '''
+    post_title_data = PostTitle.objects.filter(user_id=request.user.id , search_date_interval=val2(), search_word=val(), date=date.today().strftime("%b-%d-%Y"))
+    post_dict = {
+        "post_title_data": post_title_data
+    }
+
+    return render(request, "displaypost.html", post_dict)
 
 
 
