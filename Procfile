@@ -1,0 +1,1 @@
+web: gunicorn swe.wsgi --timeout 4800 --keep-alive 5 --log-file -
