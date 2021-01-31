@@ -1,2 +1,2 @@
 build:
-	docker build --force-rm -t htc-swe-573:latest .
+	docker build --force-rm -t swe-573-website:latest .
