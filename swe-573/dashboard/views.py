@@ -9,6 +9,9 @@ import praw
 import re
 from praw.models import MoreComments
 import nltk
+nltk.download('stopwords')
+nltk.download('wordnet')
+nltk.download('punkt')
 from nltk.tokenize import word_tokenize
 import string
 from nltk.corpus import stopwords
