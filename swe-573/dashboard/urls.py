@@ -10,6 +10,7 @@ urlpatterns = [
     path('wordcloud/', views.wordcloud_img),
     path('entitylist/', views.entity_list),
     path('networkgraph/', views.word_co_networkg),
-    path('showhistory/', views.show_history)
+    path('showhistory/', views.show_history),
+    path('displaynetworkg/', views.network_graph)
 
 ]

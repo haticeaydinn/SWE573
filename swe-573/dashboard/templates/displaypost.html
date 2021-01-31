@@ -1,13 +1,27 @@
 {% extends 'base.html' %}
 
+{% block content %}
 
-<body>
 
-    {% block content %}
-    <h1>Post Titles</h1>
-    
-            {{ dat | linebreaks  }}
-    
-    {% endblock %}
-    
-</body>
+<table style="width: 100%;" border="1" cellpadding="7">
+    <thead>
+    <tr>
+        <th>Date</th>
+        <th>Time Interval</th>
+        <th>Topic</th>
+        <th>Title</th>
+    </tr>
+    </thead>
+    <tbody>
+        {% for data in post_title_data %}
+        <tr>
+            <td>{{ data.date }}</td>
+            <td>{{ data.search_date_interval }}</td>
+            <td>{{ data.search_word }}</td>
+            <td>{{ data.title }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

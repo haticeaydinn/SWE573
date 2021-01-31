@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="row">
+  <div class="col-sm-8">
+    <div class="card text-white bg-secondary mb-3">
+      <div class="card-body">
+        <h1 class="card-title">Network Graph</h1>
+        <h5 class="card-title">After the graph is shown below, click the button to see it in detail.</h5>
+        <a href="/dashboard/displaynetworkg" class="btn btn-primary">Click here!</a>
+        <img src='/dashboard/displaynetworkg' class="card-img-top" alt="...">
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-4">
+    <div class="card text-white bg-secondary mb-3">
+      <div class="card-body">
+        <h1 class="card-title">Network Centrality Measures</h1>
+        <h3 class="card-title" style="text-align:center">Degree Centrality</h3>
+        <h5 class="card-title" style="text-align:left">This is based on the assumption that important nodes have many connections.</h5>
+        <p class="card-text">{{ degree }}</p>
+        <h3 class="card-title" style="text-align:center">Closeness Centrality</h3>
+        <h5 class="card-title" style="text-align:left">This is based on the assumption that important nodes are close to other nodes. 
+          It is calculated as the sum of the path lengths from the given node to all other nodes. </h5>
+        <p class="card-text">{{ close }}</p>
+        <h3 class="card-title" style="text-align:center">Betweenness Centrality</h3>
+        <h5 class="card-title" style="text-align:left">It assumes that important nodes connect other nodes. </h5>
+        <p class="card-text">{{ between }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

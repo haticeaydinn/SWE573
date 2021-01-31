@@ -15,3 +15,6 @@ class PostTitle(models.Model):
     search_word = models.CharField(max_length=50)
     search_date_interval = models.CharField(max_length=20)
     title = models.CharField(max_length=2083)
+    sentiment_polarity = models.FloatField(default=0.0)
+    sentiment = models.CharField(max_length=10, default='No Info')
+    sentiment_subj = models.FloatField(default=0.0)
