@@ -69,12 +69,15 @@ def mplimage(request):
         today = date.today()
         date_format = today.strftime("%b-%d-%Y")
 
-        history = History()
-        history.user_id = request.user.id
-        history.date = date_format
-        history.search_word = searched_word
-        history.search_date_interval = selected_date
-        history.save()
+        # write to history table
+        history_log = History.objects.filter(user_id=request.user.id, search_date_interval=selected_date, search_word=searched_word, date=date_format)
+        if not history_log:
+            history = History()
+            history.user_id = request.user.id
+            history.date = date_format
+            history.search_word = searched_word
+            history.search_date_interval = selected_date
+            history.save()
 
         content = []
 
@@ -105,37 +108,25 @@ def mplimage(request):
             else:
                 sentiment = 'Neutral'
             
+
+            db_post = PostTitle.objects.filter(user_id=request.user.id, search_date_interval=selected_date, search_word=searched_word, date=date_format)
+            text_count = db_post.values_list('title', flat=True).count()
+
             # write post titles to db
-            post = PostTitle()
-            post.user_id = request.user.id
-            post.date = date_format
-            post.search_word = searched_word
-            post.search_date_interval = selected_date
-            post.title = title
-            post.sentiment_polarity = sent_pol
-            post.sentiment = sentiment
-            post.sentiment_subj = TextBlob(title).sentiment.subjectivity
-            post.save()
-
-
-        '''
-        with open("file.txt", 'w', encoding='utf-8') as filetowrite:
-            for row in content:
-                # s = "".join(map(str, remove_emoji(row)))
-                # s = emoji.get_emoji_regexp().sub(u'', row)
-                filetowrite.write(row + '\n')
-        '''
-
-        '''
-        # load data
-        filename = 'file.txt'
-        file = open(filename, 'rt', encoding='utf-8')
-        text = file.read()
-        file.close()
-        # split into words
-        '''
-
-        db_post = PostTitle.objects.filter(user_id=request.user.id , search_date_interval=selected_date, search_word=searched_word, date=date.today().strftime("%b-%d-%Y"))
+            if text_count != 100:
+            # if not db_post:
+                post = PostTitle()
+                post.user_id = request.user.id
+                post.date = date_format
+                post.search_word = searched_word
+                post.search_date_interval = selected_date
+                post.title = title
+                post.sentiment_polarity = sent_pol
+                post.sentiment = sentiment
+                post.sentiment_subj = TextBlob(title).sentiment.subjectivity
+                post.save()
+            
+        db_post = PostTitle.objects.filter(user_id=request.user.id, search_date_interval=selected_date, search_word=searched_word, date=date.today().strftime("%b-%d-%Y"))
         text = db_post.values_list('title', flat=True)
 
         my_string = ''
@@ -303,8 +294,38 @@ def tagme_result(request):
 
 def sentiment_analysis(request):
     db_post = PostTitle.objects.filter(user_id=request.user.id , search_date_interval=val2(), search_word=val(), date=date.today().strftime("%b-%d-%Y"))
-    file2 = db_post.values_list('title', flat=True)
+    file2 = db_post.values_list('sentiment', flat=True)
+
+    pos_count = 0
+    neg_count = 0
+    neut_count = 0
+
+    for line in file2:
+        if line == 'Positive':
+            pos_count += 1
+        elif line == 'Negative':
+            neg_count += 1
+        elif line == 'Neutral':
+            neut_count += 1
+
+    plt.switch_backend('agg')
+    labels = 'Positive', 'Negative', 'Neutral'
+    sizes = [pos_count, neg_count, neut_count]
+    colors = ['#00cc00','#ff0000','#ffcc99']
+
+    fig1, ax1 = plt.subplots()
+    ax1.pie(sizes, labels=labels, autopct='%1.1f%%',
+            shadow=True, startangle=90, colors=colors)
+    ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
+    # plt.close(fig)
+
+    response = HttpResponse(buf.getvalue(), content_type='image/png')
+    return response
     
+    '''
     # file2 = open('file.txt', 'r', encoding='utf-8') 
     count = 0
     sent_list = []
@@ -322,7 +343,7 @@ def sentiment_analysis(request):
     # Closing files 
     # file2.close()
     return HttpResponse(sent_list, content_type="text/plain")
-
+    '''
 
 def wordcloud_img(request):
 
@@ -498,7 +519,7 @@ def word_co_networkg(request):
             G.add_edge(node_x, node_y, weight=jaccard)
 
     plt.switch_backend('agg')        
-    plt.figure(figsize=(15,15))
+    plt.figure(figsize=(25,25))
     pos = nx.spring_layout(G, k=0.1)
 
     node_size = [d['count']*100 for (n,d) in G.nodes(data=True)]
