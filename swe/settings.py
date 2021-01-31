@@ -127,8 +127,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 # heroku edition
-STATIC_ROOT = str(BASE_DIR.joinpath('staticfiles'))
-STATICFILES_DIRS = [str(BASE_DIR.joinpath('static'))]
+STATIC_ROOT= os.path.join(BASE_DIR,'static_media/')
+STATICFILES_DIRS = ( os.path.join(BASE_DIR,'static/'),)
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 # end heroku edition
 
