@@ -7,7 +7,14 @@
     {% csrf_token %}
     {{ form.as_p }}
     Type the topic you want to analyze: <input type="text" name="name" placeholder="COVID, ELECTION...">
-    Select the time interval: <input type="text" name="date_interval" placeholder="day, week, month or year">
+    Select the time interval: <input list='dates_list' name="date_interval">
+    <datalist id="dates_list">
+      <option value="hour">
+      <option value="day">
+      <option value="week">
+      <option value="month">
+      <option value="year">
+    </datalist>
     <button class="btn btn-light" type="submit">Analyze!</button>
   </form>
   <h5>The word you searched for: {{data}}</h5>
@@ -37,10 +44,6 @@
         <h1 class="card-title" style="text-align:center">Analysis Steps</h1>
         <h5 class="card-title">Post Titles</h5>
         <a href="/dashboard/displayposts" class="btn btn-primary">Click to see the post titles</a>
-        <h5 class="card-title">Entity List</h5>
-        <a href="/dashboard/tagme" class="btn btn-primary">Click to see the entity list</a>
-        <h5 class="card-title">Entity Relation</h5>
-        <a href="/dashboard/entitylist" class="btn btn-primary">Click to see the entity relations</a>
         <h5 class="card-title">Word Co-occurrence Graph</h5>
         <a href="/dashboard/networkgraph" class="btn btn-primary">Click to see the network graph</a>
         <h5 class="card-title">WorldCloud</h5>
